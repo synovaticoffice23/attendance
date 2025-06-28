@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #9b59b6;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --gray: #95a5a6;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #f5f7fa; 
+            color: #333;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 8px 8px 0 0; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .report-container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.1); 
+            border-radius: 8px; 
+            overflow: hidden;
+            background: white;
+        }
+        
+        .employee-card { 
+            background: white; 
+            margin-bottom: 30px; 
+            border-radius: 8px; 
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .late-minutes {
+        font-weight: bold;
+    }
+    .overtime {
+        font-weight: bold;
+    }
+        
+        .employee-header { 
+            background: var(--secondary); 
+            color: white; 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats { 
+            display: flex; 
+            background-color: var(--light); 
+            padding: 15px; 
+            gap: 15px;
+        }
+        
+        .stat-box { 
+            flex: 1; 
+            text-align: center; 
+            padding: 15px; 
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stat-box h3 { 
+            margin: 0; 
+            color: var(--gray); 
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .stat-box p { 
+            font-size: 24px; 
+            margin: 8px 0 0; 
+            color: var(--dark); 
+            font-weight: 600;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse;
+        }
+        
+        th { 
+            background-color: var(--primary); 
+            color: white; 
+            padding: 12px 15px; 
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+        
+        td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #eee; 
+            vertical-align: middle;
+        }
+        
+        tr:nth-child(even) { 
+            background-color: #f8f9fa; 
+        }
+        
+        .footer { 
+            text-align: center; 
+            margin-top: 30px; 
+            padding: 20px; 
+            color: var(--gray); 
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        
+        .print-btn { 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            float: right; 
+            margin: 20px; 
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .print-btn:hover { 
+            background-color: var(--secondary); 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .present { 
+            background-color: rgba(46, 204, 113, 0.1); 
+            color: var(--success);
+        }
+        
+        .absent { 
+            background-color: rgba(231, 76, 60, 0.1); 
+            color: var(--danger);
+        }
+        
+        .day-off { 
+            background-color: rgba(155, 89, 182, 0.1); 
+            color: var(--info);
+        }
+        
+        /* Shift Tags */
+        .shift-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .day-shift { 
+            background-color: rgba(46, 204, 113, 0.1); 
+            color: var(--success);
+        }
+        
+        .night-shift { 
+            background-color: rgba(155, 89, 182, 0.1); 
+            color: var(--info);
+        }
+        
+        .time-entry { 
+            font-weight: 500; 
+            white-space: nowrap;
+        }
+        
+        .highlight-today {
+            background-color: #fff8e1 !important;
+            position: relative;
+        }
+        
+        .highlight-today::after {
+            content: "Today";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--warning);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> Attendance Report</h1>
+            <p>Generated on {{ report_date }} | File: {{ filename }} | Period: {{ month_year }}</p>
+        </div>
+
+        <button onclick="window.print()" class="print-btn">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+
+        {% for employee in employees %}
+        <div class="employee-card">
+            <div class="employee-header">
+                <h2><i class="fas fa-user"></i> {{ employee.name }}</h2>
+                <div class="employee-id">Employee #{{ loop.index }}</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>Days Present</h3>
+                    <p>{{ employee.present_days }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Total Hours</h3>
+                    <p>{{ employee.total_hours }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Avg Daily Hours</h3>
+                    <p>{{ employee.average_hours }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Total Late (mins)</h3>
+                    <p>{{ employee.total_late_minutes }}</p>
+                </div>
+                <div class="stat-box">
+                <h3>Total Overtime (mins)</h3>
+                <p>
+                    {% set total_ot_hours = employee.total_overtime_minutes // 60 %}
+                    {% set total_ot_minutes = employee.total_overtime_minutes % 60 %}
+                    {% if employee.total_overtime_minutes >= 15 %}
+                        {{ total_ot_hours }}h {{ total_ot_minutes }}m
+                    {% else %}
+                        0
+                    {% endif %}
+                </p>
+            </div>
+            </div>
+            
+            <table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Time In</th>
+            <th>Time Out</th>
+            <th>Hours</th>
+            <th>Late (mins)</th>
+            <th>OverTime (mins)</th>
+            <th>Status</th>
+            <th>Shift</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for day in employee.days %}
+        <tr class="{% if day.date == report_date %}highlight-today{% endif %}">
+            <td>{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1] }}</td>
+            <td>
+                {% if day.is_sunday %}
+                    <span style="color: var(--info);">{{ day.day_name }}</span>
+                {% else %}
+                    {{ day.day_name }}
+                {% endif %}
+            </td>
+            <td class="time-entry">{{ day.time_in }}</td>
+            <td class="time-entry">{{ day.time_out }}</td>
+            <td>{{ day.hours }}</td>
+            <td>
+                {% if day.late_minutes > 0 %}
+                    <span class="late-minutes" style="color: var(--danger);">
+                        {{ day.late_minutes }}
+                    </span>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if day.overtime_minutes >= 15 %}
+                    {% set ot_hours = day.overtime_minutes // 60 %}
+                    {% set ot_minutes = day.overtime_minutes % 60 %}
+                    {% if ot_hours > 0 %}
+                        {{ ot_hours }}h {{ ot_minutes }}m
+                    {% else %}
+                        {{ ot_minutes }}m
+                    {% endif %}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if day.status == 'day_off' %}
+                    <span class="status-badge day-off">
+                        <i class="fas fa-umbrella-beach"></i> Day Off
+                    </span>
+                {% elif day.status == 'absent' %}
+                    <span class="status-badge absent">
+                        <i class="fas fa-times"></i> Absent
+                    </span>
+                {% elif day.status == 'no_time_in' %}
+                    <span class="status-badge absent">
+                        <i class="fas fa-clock"></i> No Time In
+                    </span>
+                {% elif day.status == 'no_time_out' %}
+                    <span class="status-badge absent">
+                        <i class="fas fa-clock"></i> No Time Out
+                    </span>
+                {% else %}
+                    <span class="status-badge present">
+                        <i class="fas fa-check"></i> Present
+                    </span>
+                {% endif %}
+            </td>
+            <td>
+                {% if day.shift_type and day.status != 'day_off' and day.status != 'absent' %}
+                    <span class="shift-tag {% if day.shift_type in ['night', 'late_night'] %}night-shift{% else %}day-shift{% endif %}">
+                        <i class="fas {% if day.shift_type in ['night', 'late_night'] %}fa-moon{% else %}fa-sun{% endif %}"></i>
+                        {{ day.shift_type|replace('_', ' ')|title }} Shift
+                    </span>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+        </div>
+        {% endfor %}
+        
+        <div class="footer">
+            <p>Generated by Attendance Report System | &copy; {{ report_date[:4] }}</p>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animation to stats boxes
+            const statBoxes = document.querySelectorAll('.stat-box');
+            statBoxes.forEach(box => {
+                box.style.transform = 'scale(0.95)';
+                box.style.transition = 'transform 0.3s ease';
+                
+                box.addEventListener('mouseenter', () => {
+                    box.style.transform = 'scale(1.03)';
+                });
+                
+                box.addEventListener('mouseleave', () => {
+                    box.style.transform = 'scale(0.95)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
